@@ -185,12 +185,17 @@ try:
 
     image = Image.new('1', (width, height))
     draw = ImageDraw.Draw(image)
+    font_6 = ImageFont.truetype('/opt/%s/Minecraftia-Regular.ttf'%__app_name__, 6)
     font_8 = ImageFont.truetype('/opt/%s/Minecraftia-Regular.ttf'%__app_name__, 8)
     font_12 = ImageFont.truetype('/opt/%s/Minecraftia-Regular.ttf'%__app_name__, 12)
 
     def draw_text(text,x,y,fill=1):
-        text = str(text)
-        draw.text((x, y), text=text, font=font_8, fill=fill)
+            text = str(text)
+            draw.text((x, y), text=text, font=font_8, fill=fill)
+
+    def draw_small_text(text,x,y,fill=1):
+            text = str(text)
+            draw.text((x, y), text=text, font=font_6, fill=fill)
 
     oled_ok = True
     oled_stat = True
@@ -426,20 +431,20 @@ def main():
             # IP
             draw.rectangle((ip_rect.x-13,ip_rect.y,ip_rect.x+ip_rect.width,ip_rect.height), outline=1, fill=1)
             draw.pieslice((ip_rect.x-25,ip_rect.y,ip_rect.x-3,ip_rect.height+10), start=270, end=0, fill=0, outline=0)
-            draw_text(ip,*ip_rect.coord(),0)
+            draw_text(f'AP: {ip}', *ip_rect.coord(), 0)
             client_count = '--' if ap_clients is None else ap_clients
             ssid = '--' if ap_ssid is None else ap_ssid
             if len(ssid) > 8:
                 ssid = ssid[:5] + '...'
-            draw_text(f'SSID', 40, 13)
+            draw_small_text(f'SSID', 40, 15)
             draw_text(f'{ssid}', 65, 13)
-            draw_text(f'> {client_count} clients', 45, 23)
-            draw_text(f'RAM', 40, 35)
-            draw_text(f'{ram_used:g}/{ram_total:g}G', 65, 35)
-            draw_text(f'ROM', 40, 45)
-            draw_text(f'{disk_values}', 65, 45)
-            draw_text(f'UP', 40, 55)
-            draw_text(f'{uptime_text}', 65, 55)
+            draw_small_text(f'> {client_count} clients', 45, 23)
+            draw_small_text(f'RAM', 40, 37)
+            draw_text(f'{ram_used:g}/{ram_total:g}G', 63, 35)
+            draw_small_text(f'ROM', 40, 47)
+            draw_text(f'{disk_values}', 63, 45)
+            draw_small_text(f'UP', 40, 57)
+            draw_text(f'{uptime_text}', 63, 55)
             # draw the image buffer.
             oled.image(image)
             oled.display()
