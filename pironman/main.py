@@ -417,6 +417,12 @@ def main():
                 disk_values = f'{disk_used:.{_dec}f}/{disk_total:.0f}G'
             elif disk_unit == 'T':
                 disk_values = f'{disk_used:.2f}/{disk_total:.2f}T'
+            uptime_seconds = int(get_system_uptime())
+            uptime_days, remainder = divmod(uptime_seconds, 86400)
+            uptime_hours, remainder = divmod(remainder, 3600)
+            uptime_minutes = remainder // 60
+            uptime_clock = f'{uptime_hours:02}t {uptime_minutes:02}m'
+            uptime_text = f'{uptime_days}d {uptime_clock}' if uptime_days else uptime_clock
             # IP
             draw.rectangle((ip_rect.x-13,ip_rect.y,ip_rect.x+ip_rect.width,ip_rect.height), outline=1, fill=1)
             draw.pieslice((ip_rect.x-25,ip_rect.y,ip_rect.x-3,ip_rect.height+10), start=270, end=0, fill=0, outline=0)
@@ -428,7 +434,10 @@ def main():
             draw_text(f'SSID: {ssid}', 40, 12)
             draw_text(f'AP clients: {client_count}', 40, 24)
             draw_text(f'RAM: {ram_used:g}/{ram_total:g}G', 40, 36)
-            draw_text(f'DISK: {disk_values}', 40, 48)
+            draw_text(f'ROM', 40, 45)
+            draw_text(f'{disk_values}', 65, 45)
+            draw_text(f'UP', 40, 55)
+            draw_text(f'{uptime_text}', 65, 55)
             # draw the image buffer.
             oled.image(image)
             oled.display()

@@ -4,6 +4,12 @@ import subprocess
 import shutil
 import psutil
 
+
+def get_system_uptime():
+    with open('/proc/uptime', 'r', encoding='ascii') as uptime_file:
+        return float(uptime_file.readline().split()[0])
+
+
 def get_cpu_temperature():
     '''
     Return CPU temperature as a character string
