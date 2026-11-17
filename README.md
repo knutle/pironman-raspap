@@ -36,8 +36,8 @@ When RaspAP is running, the OLED also shows its SSID, the number of connected ac
 - Execute the installation script
   ```bash
   cd ~
-  git clone -b v2.0 https://github.com/sunfounder/pironman.git
-  cd ~/pironman
+  git clone -b v2.0-raspap https://github.com/knutle/pironman-raspap.git
+  cd ~/pironman-raspap
   sudo python3 install.py
   ```
 
