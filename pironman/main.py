@@ -431,9 +431,11 @@ def main():
             ssid = '--' if ap_ssid is None else ap_ssid
             if len(ssid) > 8:
                 ssid = ssid[:5] + '...'
-            draw_text(f'SSID: {ssid}', 40, 12)
-            draw_text(f'AP clients: {client_count}', 40, 24)
-            draw_text(f'RAM: {ram_used:g}/{ram_total:g}G', 40, 36)
+            draw_text(f'SSID', 40, 13)
+            draw_text(f'{ssid}', 65, 13)
+            draw_text(f'> {client_count} clients', 45, 23)
+            draw_text(f'RAM', 40, 35)
+            draw_text(f'{ram_used:g}/{ram_total:g}G', 65, 35)
             draw_text(f'ROM', 40, 45)
             draw_text(f'{disk_values}', 65, 45)
             draw_text(f'UP', 40, 55)
