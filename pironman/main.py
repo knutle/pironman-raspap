@@ -290,6 +290,9 @@ def main():
 
     ip = 'DISCONNECT'
     last_ip = 'DISCONNECT'
+    ap_clients = None
+    last_ap_client_update = 0
+    ap_client_query_failed = None
 
     time_start = time.time()
     power_key_flag = False
@@ -364,11 +367,22 @@ def main():
                 last_ip = ip
                 log("Get IP: %s" %ip)
 
+            if time.time() - last_ap_client_update >= 5:
+                ap_clients = get_connected_ap_clients()
+                last_ap_client_update = time.time()
+                log(f'AP clients updated: {ap_clients}')
+                if ap_clients is None and ap_client_query_failed is not True:
+                    log('Unable to read connected AP clients from hostapd')
+                    ap_client_query_failed = True
+                elif ap_clients is not None and ap_client_query_failed is True:
+                    log('Connected AP client query recovered')
+                    ap_client_query_failed = False
+
             # ---- display info ----
             ip_rect = Rect(40, 0, 87, 10)
-            ram_info_rect = Rect(40, 17, 87, 10)
-            ram_rect = Rect(40, 29, 87, 10)
-            rom_info_rect = Rect(40, 41, 87, 10)
+            ram_info_rect = Rect(40, 20, 87, 10)
+            ram_rect = Rect(40, 30, 87, 10)
+            rom_info_rect = Rect(40, 42, 87, 10)
             rom_rect = Rect(40, 53, 87, 10)
             # cpu usage
             draw_text('CPU',6,0)
@@ -409,6 +423,8 @@ def main():
             draw.rectangle((ip_rect.x-13,ip_rect.y,ip_rect.x+ip_rect.width,ip_rect.height), outline=1, fill=1)
             draw.pieslice((ip_rect.x-25,ip_rect.y,ip_rect.x-3,ip_rect.height+10), start=270, end=0, fill=0, outline=0)
             draw_text(ip,*ip_rect.coord(),0)
+            client_count = '--' if ap_clients is None else ap_clients
+            draw_text(f'AP clients: {client_count}', 40, 11)
             # draw the image buffer.
             oled.image(image)
             oled.display()

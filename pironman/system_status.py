@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import shutil
 import psutil
@@ -75,6 +76,28 @@ def getMAC():
         # print(NIC, MACs[NIC])
 
     return MACs
+
+
+def get_connected_ap_clients(interface='wlan0'):
+    try:
+        result = subprocess.run(
+            ['hostapd_cli', '-i', interface, 'list_sta'],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if result.returncode != 0:
+        return None
+
+    stations = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if any(re.fullmatch(r'(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}', station) is None
+           for station in stations):
+        return None
+    return len(stations)
 
 
 
