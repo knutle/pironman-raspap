@@ -100,6 +100,28 @@ def get_connected_ap_clients(interface='wlan0'):
     return len(stations)
 
 
+def get_ap_ssid(interface='wlan0'):
+    try:
+        result = subprocess.run(
+            ['hostapd_cli', '-i', interface, 'get_config'],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if result.returncode != 0:
+        return None
+
+    for line in result.stdout.splitlines():
+        key, separator, value = line.partition('=')
+        if separator and key.strip() == 'ssid':
+            return value or None
+    return None
+
+
 
 if __name__ == '__main__':
     # CPU informatiom

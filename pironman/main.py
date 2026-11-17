@@ -291,8 +291,10 @@ def main():
     ip = 'DISCONNECT'
     last_ip = 'DISCONNECT'
     ap_clients = None
+    ap_ssid = None
     last_ap_client_update = 0
     ap_client_query_failed = None
+    ap_ssid_query_failed = None
 
     time_start = time.time()
     power_key_flag = False
@@ -369,6 +371,7 @@ def main():
 
             if time.time() - last_ap_client_update >= 5:
                 ap_clients = get_connected_ap_clients()
+                ap_ssid = get_ap_ssid()
                 last_ap_client_update = time.time()
                 log(f'AP clients updated: {ap_clients}')
                 if ap_clients is None and ap_client_query_failed is not True:
@@ -377,6 +380,12 @@ def main():
                 elif ap_clients is not None and ap_client_query_failed is True:
                     log('Connected AP client query recovered')
                     ap_client_query_failed = False
+                if ap_ssid is None and ap_ssid_query_failed is not True:
+                    log('Unable to read AP SSID from hostapd')
+                    ap_ssid_query_failed = True
+                elif ap_ssid is not None and ap_ssid_query_failed is True:
+                    log('AP SSID query recovered')
+                    ap_ssid_query_failed = False
 
             # ---- display info ----
             ip_rect = Rect(40, 0, 87, 10)
@@ -395,9 +404,7 @@ def main():
                 draw.pieslice((0, 33, 30, 63), start=0, end=180, fill=0, outline=1)
                 pcent = (CPU_temp_F-32)/1.8
                 draw.pieslice((0, 33, 30, 63), start=int(180-180*pcent*0.01), end=180, fill=1, outline=1)
-            # RAM
-            draw_text(f'RAM: {ram_used:g}/{ram_total:g}G', 40, 24)
-            # Disk
+            # Disk values
             if disk_unit == 'G1':
                 _dec = 1
                 if disk_used < 10:
@@ -410,13 +417,18 @@ def main():
                 disk_values = f'{disk_used:.{_dec}f}/{disk_total:.0f}G'
             elif disk_unit == 'T':
                 disk_values = f'{disk_used:.2f}/{disk_total:.2f}T'
-            draw_text(f'DISK: {disk_values}', 40, 36)
             # IP
             draw.rectangle((ip_rect.x-13,ip_rect.y,ip_rect.x+ip_rect.width,ip_rect.height), outline=1, fill=1)
             draw.pieslice((ip_rect.x-25,ip_rect.y,ip_rect.x-3,ip_rect.height+10), start=270, end=0, fill=0, outline=0)
             draw_text(ip,*ip_rect.coord(),0)
             client_count = '--' if ap_clients is None else ap_clients
-            draw_text(f'AP clients: {client_count}', 40, 12)
+            ssid = '--' if ap_ssid is None else ap_ssid
+            if len(ssid) > 8:
+                ssid = ssid[:5] + '...'
+            draw_text(f'SSID: {ssid}', 40, 12)
+            draw_text(f'AP clients: {client_count}', 40, 24)
+            draw_text(f'RAM: {ram_used:g}/{ram_total:g}G', 40, 36)
+            draw_text(f'DISK: {disk_values}', 40, 48)
             # draw the image buffer.
             oled.image(image)
             oled.display()

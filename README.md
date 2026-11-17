@@ -21,7 +21,7 @@ Quick Links:
     <!-- <img src="./img/Nano_Sloth_V2.png" width="212" height="261" align="center" title="Nano_Sloth_V2"/> -->
 </div>
 The pironman is used on Raspberry Pi to control OLED to display system status information, control cooling fan and RGB light strip and so on.
-When RaspAP is running, the OLED also shows the number of connected access point clients.
+When RaspAP is running, the OLED also shows its SSID and the number of connected access point clients.
 
 
 <a id="update"></a>
