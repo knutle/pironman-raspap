@@ -380,10 +380,6 @@ def main():
 
             # ---- display info ----
             ip_rect = Rect(40, 0, 87, 10)
-            ram_info_rect = Rect(40, 20, 87, 10)
-            ram_rect = Rect(40, 30, 87, 10)
-            rom_info_rect = Rect(40, 42, 87, 10)
-            rom_rect = Rect(40, 53, 87, 10)
             # cpu usage
             draw_text('CPU',6,0)
             draw.pieslice((0, 12, 30, 42), start=180, end=0, fill=0, outline=1)
@@ -400,31 +396,27 @@ def main():
                 pcent = (CPU_temp_F-32)/1.8
                 draw.pieslice((0, 33, 30, 63), start=int(180-180*pcent*0.01), end=180, fill=1, outline=1)
             # RAM
-            draw_text(f'RAM:  {ram_used:^4.1f}/{ram_total:^4.1f} G',*ram_info_rect.coord())
-            draw.rectangle(ram_rect.rect(), outline=1, fill=0)
-            draw.rectangle(ram_rect.rect(ram_percent), outline=1, fill=1)
+            draw_text(f'RAM: {ram_used:g}/{ram_total:g}G', 40, 24)
             # Disk
             if disk_unit == 'G1':
                 _dec = 1
                 if disk_used < 10:
                     _dec = 2              
-                draw_text(f'DISK: {disk_used:>2.{_dec}f}/{disk_total:<2.1f} G', *rom_info_rect.coord())
+                disk_values = f'{disk_used:.{_dec}f}/{disk_total:.1f}G'
             elif disk_unit == 'G2':
                 _dec = 0
                 if disk_used < 100:
                     _dec = 1
-                draw_text(f'DISK: {disk_used:>3.{_dec}f}/{disk_total:<3.0f} G', *rom_info_rect.coord())
+                disk_values = f'{disk_used:.{_dec}f}/{disk_total:.0f}G'
             elif disk_unit == 'T':
-                draw_text(f'DISK: {disk_used:>2.2f}/{disk_total:<2.2f} T', *rom_info_rect.coord())
-
-            draw.rectangle(rom_rect.rect(), outline=1, fill=0)
-            draw.rectangle(rom_rect.rect(disk_percent), outline=1, fill=1)
+                disk_values = f'{disk_used:.2f}/{disk_total:.2f}T'
+            draw_text(f'DISK: {disk_values}', 40, 36)
             # IP
             draw.rectangle((ip_rect.x-13,ip_rect.y,ip_rect.x+ip_rect.width,ip_rect.height), outline=1, fill=1)
             draw.pieslice((ip_rect.x-25,ip_rect.y,ip_rect.x-3,ip_rect.height+10), start=270, end=0, fill=0, outline=0)
             draw_text(ip,*ip_rect.coord(),0)
             client_count = '--' if ap_clients is None else ap_clients
-            draw_text(f'AP clients: {client_count}', 40, 11)
+            draw_text(f'AP clients: {client_count}', 40, 12)
             # draw the image buffer.
             oled.image(image)
             oled.display()
