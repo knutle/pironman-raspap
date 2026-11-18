@@ -10,7 +10,9 @@ User=root
 WorkingDirectory=/opt/pironman
 ExecStart=/usr/local/bin/pironman start
 #ExecStop=/usr/local/bin/pironman stop
-PrivateTmp=True
+
+# Ensures hostapd calls after first boot will succeeed:
+PrivateTmp=False
 
 [Install]
 WantedBy=multi-user.target
