@@ -1,3 +1,4 @@
+from utils import log
 import os
 import re
 import subprocess
@@ -84,7 +85,12 @@ def getMAC():
     return MACs
 
 
+_last_ap_clients_error = None
+
+
 def get_connected_ap_clients(interface='wlan0'):
+    global _last_ap_clients_error
+
     try:
         result = subprocess.run(
             ['hostapd_cli', '-i', interface, 'list_sta'],
@@ -93,20 +99,50 @@ def get_connected_ap_clients(interface='wlan0'):
             timeout=2,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired) as error:
+        message = f'hostapd_cli list_sta failed for {interface}: {error}'
+        if message != _last_ap_clients_error:
+            log(message)
+        _last_ap_clients_error = message
         return None
 
     if result.returncode != 0:
+        output = '; '.join(
+            value.strip() for value in (result.stdout, result.stderr) if value
+        )
+        message = (
+            f'hostapd_cli list_sta failed for {interface} '
+            f'(exit {result.returncode}): {output}'
+        )
+        if message != _last_ap_clients_error:
+            log(message)
+        _last_ap_clients_error = message
         return None
 
     stations = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    if any(re.fullmatch(r'(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}', station) is None
-           for station in stations):
+    if any(
+        re.fullmatch(r'(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}', station) is None
+        for station in stations
+    ):
+        message = (
+            f'hostapd_cli list_sta returned invalid output for {interface}: '
+            f'{result.stdout.strip()}'
+        )
+        if message != _last_ap_clients_error:
+            log(message)
+        _last_ap_clients_error = message
         return None
+
+    _last_ap_clients_error = None
     return len(stations)
 
 
+_last_ap_ssid_error = None
+
+
 def get_ap_ssid(interface='wlan0'):
+    global _last_ap_ssid_error
+
     try:
         result = subprocess.run(
             ['hostapd_cli', '-i', interface, 'get_config'],
@@ -115,12 +151,24 @@ def get_ap_ssid(interface='wlan0'):
             timeout=2,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired) as error:
+        message = f'hostapd_cli get_config failed: {error}'
+        if message != _last_ap_ssid_error:
+            log(message)
+        _last_ap_ssid_error = message
         return None
 
     if result.returncode != 0:
+        output = '; '.join(
+            value.strip() for value in (result.stdout, result.stderr) if value
+        )
+        message = f'hostapd_cli get_config failed (exit {result.returncode}): {output}'
+        if message != _last_ap_ssid_error:
+            log(message)
+        _last_ap_ssid_error = message
         return None
 
+    _last_ap_ssid_error = None
     for line in result.stdout.splitlines():
         key, separator, value = line.partition('=')
         if separator and key.strip() == 'ssid':

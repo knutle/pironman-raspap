@@ -63,6 +63,8 @@ power_key_pin = 16
 fan_pin = 6
 rgb_pin = 10
 update_frequency = 0.5  # second
+ap_status_update_interval = 5  # seconds
+ap_status_retry_interval = 2  # seconds
 
 temp_unit = 'C' # 'C' or 'F'
 fan_temp = 50 # celsius
@@ -374,23 +376,39 @@ def main():
                 last_ip = ip
                 log("Get IP: %s" %ip)
 
-            if time.time() - last_ap_client_update >= 5:
+            ap_status_interval = (
+                ap_status_retry_interval
+                if ap_clients is None or ap_ssid is None
+                else ap_status_update_interval
+            )
+            if time.time() - last_ap_client_update >= ap_status_interval:
+                first_ap_status_update = last_ap_client_update == 0
+                previous_ap_clients = ap_clients
+                previous_ap_ssid = ap_ssid
                 ap_clients = get_connected_ap_clients()
                 ap_ssid = get_ap_ssid()
                 last_ap_client_update = time.time()
-                log(f'AP clients updated: {ap_clients}')
+
+                if first_ap_status_update:
+                    log('Try AP info update')
+
                 if ap_clients is None and ap_client_query_failed is not True:
                     log('Unable to read connected AP clients from hostapd')
                     ap_client_query_failed = True
                 elif ap_clients is not None and ap_client_query_failed is True:
                     log('Connected AP client query recovered')
                     ap_client_query_failed = False
+                elif first_ap_status_update or ap_clients != previous_ap_clients:
+                    log(f'AP clients update success: {ap_clients}')
+
                 if ap_ssid is None and ap_ssid_query_failed is not True:
                     log('Unable to read AP SSID from hostapd')
                     ap_ssid_query_failed = True
                 elif ap_ssid is not None and ap_ssid_query_failed is True:
                     log('AP SSID query recovered')
                     ap_ssid_query_failed = False
+                elif first_ap_status_update or ap_ssid != previous_ap_ssid:
+                    log(f'AP SSID update success: {ap_ssid}')
 
             # ---- display info ----
             ip_rect = Rect(40, 0, 87, 10)
